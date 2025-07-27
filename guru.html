@@ -19,6 +19,8 @@
     #form-guru { margin-bottom: 14px; }
     .aksi-btn { margin-right:5px; }
     .aksi-btn[disabled] { background: #ccc; color: #777; cursor: not-allowed; }
+    .foto-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 1px solid #bbb; background: #eee; }
+    .foto-upload { display:inline-block; margin-right:8px; }
     @media (max-width:1200px){
       .container-main { max-width: 100vw;}
       table { font-size: 0.95em;}
@@ -64,12 +66,16 @@
         <input type="text" id="jenjang_pendidikan" required placeholder="S1, S2, D3, dll">
       </label>
       <label>Mata Pelajaran: <input type="text" id="mapel" required></label>
+      <label class="foto-upload">Foto:
+        <input type="file" id="foto" accept="image/*">
+      </label>
       <button type="submit">Tambah Guru</button>
     </form>
     <table id="tabel-guru" style="margin-top:10px; width:100%">
       <thead>
         <tr>
           <th>No</th>
+          <th>Foto</th>
           <th>Nama</th>
           <th>NIP</th>
           <th>NUPTK</th>
@@ -97,6 +103,10 @@ function updateTable() {
     if (editIdx === idx) {
       tr.innerHTML = `
         <td>${idx+1}</td>
+        <td>
+          <img src="${row.foto ? row.foto : ''}" class="foto-thumb" id="edit-foto-preview-${idx}">
+          <input type="file" id="edit-foto-${idx}" accept="image/*" style="display:block;margin-top:3px;">
+        </td>
         <td><input value="${row.nama}" id="edit-nama"></td>
         <td><input value="${row.nip}" id="edit-nip"></td>
         <td><input value="${row.nuptk}" id="edit-nuptk" maxlength="16" minlength="8" pattern="\\d*"></td>
@@ -113,9 +123,22 @@ function updateTable() {
           <button class="aksi-btn" onclick="batalEdit()">Batal</button>
         </td>
       `;
+      setTimeout(() => {
+        document.getElementById(`edit-foto-${idx}`).addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+              document.getElementById(`edit-foto-preview-${idx}`).src = ev.target.result;
+            }
+            reader.readAsDataURL(file);
+          }
+        });
+      }, 10);
     } else {
       tr.innerHTML = `
         <td>${idx+1}</td>
+        <td>${row.foto ? `<img src="${row.foto}" class="foto-thumb">` : ''}</td>
         <td>${row.nama}</td>
         <td>${row.nip}</td>
         <td>${row.nuptk}</td>
@@ -147,17 +170,32 @@ function simpanEdit(idx) {
   let status_kepegawaian = document.getElementById('edit-status_kepegawaian').value;
   let jenjang_pendidikan = document.getElementById('edit-jenjang_pendidikan').value.trim();
   let mapel = document.getElementById('edit-mapel').value.trim();
-  if (!nama || !nip || !nuptk || !status_kepegawaian || !jenjang_pendidikan || !mapel) {
-    alert("Semua kolom harus diisi!");
-    return;
+  let foto = guru[idx].foto;
+  const fileInput = document.getElementById(`edit-foto-${idx}`);
+  if (fileInput && fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      foto = ev.target.result;
+      finishEdit();
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    finishEdit();
   }
-  if (!/^\d+$/.test(nuptk) || nuptk.length < 8 || nuptk.length > 16) {
-    alert("NUPTK harus berupa angka 8 sampai 16 digit!");
-    return;
+
+  function finishEdit() {
+    if (!nama || !nip || !nuptk || !status_kepegawaian || !jenjang_pendidikan || !mapel) {
+      alert("Semua kolom harus diisi!");
+      return;
+    }
+    if (!/^\d+$/.test(nuptk) || nuptk.length < 8 || nuptk.length > 16) {
+      alert("NUPTK harus berupa angka 8 sampai 16 digit!");
+      return;
+    }
+    guru[idx] = {nama, nip, nuptk, status_kepegawaian, jenjang_pendidikan, mapel, foto};
+    editIdx = -1;
+    updateTable();
   }
-  guru[idx] = {nama, nip, nuptk, status_kepegawaian, jenjang_pendidikan, mapel};
-  editIdx = -1;
-  updateTable();
 }
 function hapusGuru(idx) {
   if (confirm("Yakin ingin menghapus data ini?")) {
@@ -174,6 +212,7 @@ document.getElementById('form-guru').addEventListener('submit', function(e) {
   const status_kepegawaian = document.getElementById('status_kepegawaian').value;
   const jenjang_pendidikan = document.getElementById('jenjang_pendidikan').value.trim();
   const mapel = document.getElementById('mapel').value.trim();
+  const fotoInput = document.getElementById('foto');
   if (!nama || !nip || !nuptk || !status_kepegawaian || !jenjang_pendidikan || !mapel) {
     alert("Semua kolom harus diisi!");
     return;
@@ -182,7 +221,19 @@ document.getElementById('form-guru').addEventListener('submit', function(e) {
     alert("NUPTK harus berupa angka 8 sampai 16 digit!");
     return;
   }
-  guru.push({nama, nip, nuptk, status_kepegawaian, jenjang_pendidikan, mapel});
+  let foto = "";
+  if (fotoInput.files && fotoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      foto = ev.target.result;
+      guru.push({nama, nip, nuptk, status_kepegawaian, jenjang_pendidikan, mapel, foto});
+      updateTable();
+      document.getElementById('form-guru').reset();
+    }
+    reader.readAsDataURL(fotoInput.files[0]);
+    return;
+  }
+  guru.push({nama, nip, nuptk, status_kepegawaian, jenjang_pendidikan, mapel, foto});
   updateTable();
   this.reset();
 });
