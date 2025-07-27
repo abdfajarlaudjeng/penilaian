@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Penilaian Siswa</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f3f3f3; }
+    .login-container {
+      max-width: 350px;
+      margin: 70px auto;
+      background: #fff;
+      padding: 30px 28px 20px 28px;
+      border-radius: 6px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.11);
+    }
+    h2 { text-align: center; margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 7px; margin-bottom: 14px; box-sizing: border-box;
+      border: 1px solid #aaa; border-radius: 3px;
+    }
+    button {
+      width: 100%; padding: 8px 0;
+      background: #3888ee; color: #fff; border: none; border-radius: 3px;
+      font-size: 16px; cursor: pointer;
+    }
+    .error { color: #d33; margin-bottom: 10px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form id="login-form" autocomplete="off">
+      <div class="error" id="error-msg" style="display:none"></div>
+      <label>Username:
+        <input type="text" id="username" required autofocus>
+      </label>
+      <label>Password:
+        <input type="password" id="password" required>
+      </label>
+      <button type="submit">Masuk</button>
+    </form>
+  </div>
+  <script>
+    // Ganti URL_SHEET dan NAMA_SHEET sesuai spreadsheet Google Anda
+    const SPREADSHEET_ID = 'PASTE_SPREADSHEET_ID_HERE';
+    const SHEET_NAME = 'users'; // misal sheet bernama users
+    const SHEET_API_KEY = 'PASTE_API_KEY_HERE';
+    // Sheet: kolom A=Username, kolom B=Password
+
+    async function fetchSheetUsers() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A2:B100?key=${SHEET_API_KEY}`;
+      const res = await fetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      // data.values = [[username, password], ...]
+      return data.values || [];
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const uname = document.getElementById('username').value.trim();
+      const pwd = document.getElementById('password').value;
+
+      document.getElementById('error-msg').style.display = "none";
+      document.getElementById('error-msg').textContent = "";
+
+      const users = await fetchSheetUsers();
+      const user = users.find(([u, p]) => u === uname && p === pwd);
+
+      if (user) {
+        // Sukses login, redirect ke halaman utama (ganti dengan nama file utama)
+        localStorage.setItem('login_user', uname);
+        window.location.href = "index.html";
+      } else {
+        document.getElementById('error-msg').textContent = "Username atau Password salah!";
+        document.getElementById('error-msg').style.display = "block";
+      }
+    });
+
+    // Jika sudah login, langsung redirect
+    if(localStorage.getItem('login_user')) window.location.href = "index.html";
+  </script>
+</body>
+</html>
