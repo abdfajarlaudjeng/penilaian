@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Data Siswa</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin:0; }
+    .navbar {
+      background: #2d7ae0; color: #fff; padding: 10px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .navbar .container {
+      display: flex; align-items: center; max-width: 980px; margin: 0 auto; padding: 0 16px; justify-content: space-between;
+    }
+    .navbar .brand { font-weight: bold; font-size: 1.2em; letter-spacing: 1px; }
+    .navbar nav a {
+      color: #fff; text-decoration: none; margin-left: 18px; font-size: 1em; transition: color 0.2s;
+    }
+    .navbar nav a:hover { text-decoration: underline; color: #d7eaff; }
+    .container-main {
+      max-width: 900px; margin: 32px auto; background: #fff;
+      padding: 32px 22px 22px 22px; border-radius: 7px;
+      box-shadow: 0 3px 18px rgba(0,0,0,0.07);
+    }
+    table, th, td { border: 1px solid #555; border-collapse: collapse; padding: 6px; }
+    th { background: #eaeaea; }
+    input, select { padding: 3px; margin: 2px; }
+    #form-siswa { margin-bottom: 14px; }
+    @media (max-width:700px){
+      .container-main { max-width: 100%; padding: 14px 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="container">
+      <span class="brand">Database Penilaian Siswa</span>
+      <nav>
+        <a href="index.html">Beranda</a>
+        <a href="penilaian.html">Data Penilaian</a>
+        <a href="siswa.html">Data Siswa</a>
+        <a href="guru.html">Data Guru</a>
+        <a href="#" onclick="logout(); return false;">Logout</a>
+      </nav>
+    </div>
+  </div>
+  <div class="container-main">
+    <h2>Data Siswa</h2>
+    <form id="form-siswa">
+      <label>Nama Siswa: <input type="text" id="nama" required></label>
+      <label>NIS: <input type="text" id="nis" required></label>
+      <label>Kelas:
+        <select id="kelas">
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select>
+      </label>
+      <button type="submit">Tambah Siswa</button>
+    </form>
+    <table id="tabel-siswa" style="margin-top:10px; width:100%">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>NIS</th>
+          <th>Kelas</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+      <!-- Data akan ditampilkan di sini -->
+      </tbody>
+    </table>
+  </div>
+<script>
+if (!localStorage.getItem('login_user')) window.location.href = "login.html";
+
+let siswa = [];
+function updateTable() {
+  const tbody = document.querySelector('#tabel-siswa tbody');
+  tbody.innerHTML = '';
+  siswa.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${row.nama}</td>
+      <td>${row.nis}</td>
+      <td>${row.kelas}</td>
+      <td><button onclick="hapusSiswa(${idx})">Hapus</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  saveLocal();
+}
+function hapusSiswa(idx) {
+  if (confirm("Yakin ingin menghapus data ini?")) {
+    siswa.splice(idx, 1);
+    updateTable();
+  }
+}
+document.getElementById('form-siswa').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const nama = document.getElementById('nama').value.trim();
+  const nis = document.getElementById('nis').value.trim();
+  const kelas = document.getElementById('kelas').value;
+  siswa.push({nama, nis, kelas});
+  updateTable();
+  this.reset();
+});
+function saveLocal() { localStorage.setItem('data_siswa', JSON.stringify(siswa)); }
+function loadLocal() {
+  siswa = [];
+  try {
+    const dt = localStorage.getItem('data_siswa');
+    if (dt) siswa = JSON.parse(dt);
+  } catch(e){}
+}
+function logout() {
+  if (confirm("Anda yakin ingin logout?")) {
+    localStorage.removeItem('login_user');
+    window.location.href = "login.html";
+  }
+}
+loadLocal();
+updateTable();
+</script>
+</body>
+</html>
