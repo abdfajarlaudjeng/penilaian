@@ -35,11 +35,10 @@
 </head>
 <body>
   <div class="sidebar">
-     <div class="sidebar">
-    <div class="brand">Sistem Informasi PENilaian, Absensi, dan Guru<</div>
+    <div class="brand">Sistem Informasi PENilaian, Absensi, dan Guru</div>
     <nav>
-      <a href="index.html" class="active">Beranda</a>
-      <a href="penilaian.html">Data Penilaian</a>
+      <a href="index.html">Beranda</a>
+      <a href="penilaian.html" class="active">Data Penilaian</a>
       <a href="siswa.html">Data Siswa</a>
       <a href="guru.html">Data Guru</a>
       <a href="absensi.html">Absensi Siswa</a>
@@ -114,7 +113,13 @@ function updateTable() {
     if (idx === editIdx) {
       tr.innerHTML = `
         <td>${idx+1}</td>
-        <td><input value="${row.kelas}" id="edit-kelas" style="width:40px"></td>
+        <td>
+          <select id="edit-kelas">
+            <option value="7"${row.kelas=='7'?' selected':''}>7</option>
+            <option value="8"${row.kelas=='8'?' selected':''}>8</option>
+            <option value="9"${row.kelas=='9'?' selected':''}>9</option>
+          </select>
+        </td>
         <td><input value="${row.nama}" id="edit-nama"></td>
         <td><input value="${row.mapel}" id="edit-mapel"></td>
         <td><input type="number" value="${row.harian}" id="edit-harian" style="width:60px"></td>
@@ -207,7 +212,7 @@ function downloadCSV() {
       C: "Cukup",
       PB: "Perlu Bimbingan"
     }[row.predikat] || row.predikat;
-    csv += `${idx+1},${row.kelas},"${row.nama}","${row.mapel}",${row.harian},${row.semester},"${pred}","${row.deskripsi.replace(/"/g,'""')}"\n`;
+    csv += `${idx+1},${row.kelas},"${row.nama.replace(/"/g,'""')}","${row.mapel.replace(/"/g,'""')}",${row.harian},${row.semester},"${pred}","${row.deskripsi.replace(/"/g,'""')}"\n`;
   });
   const blob = new Blob([csv], {type: 'text/csv'});
   const url = URL.createObjectURL(blob);
