@@ -42,18 +42,16 @@
     </form>
   </div>
   <script>
-    // Ganti URL_SHEET dan NAMA_SHEET sesuai spreadsheet Google Anda
+    // Ganti SPREADSHEET_ID dan SHEET_API_KEY sesuai milik Anda
     const SPREADSHEET_ID = 'PASTE_SPREADSHEET_ID_HERE';
-    const SHEET_NAME = 'users'; // misal sheet bernama users
+    const SHEET_NAME = 'users'; // Sheet user
     const SHEET_API_KEY = 'PASTE_API_KEY_HERE';
-    // Sheet: kolom A=Username, kolom B=Password
 
     async function fetchSheetUsers() {
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}!A2:B100?key=${SHEET_API_KEY}`;
       const res = await fetch(url);
       if (!res.ok) return [];
       const data = await res.json();
-      // data.values = [[username, password], ...]
       return data.values || [];
     }
 
@@ -69,7 +67,6 @@
       const user = users.find(([u, p]) => u === uname && p === pwd);
 
       if (user) {
-        // Sukses login, redirect ke halaman utama (ganti dengan nama file utama)
         localStorage.setItem('login_user', uname);
         window.location.href = "index.html";
       } else {
@@ -78,7 +75,6 @@
       }
     });
 
-    // Jika sudah login, langsung redirect
     if(localStorage.getItem('login_user')) window.location.href = "index.html";
   </script>
 </body>
