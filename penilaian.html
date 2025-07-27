@@ -2,58 +2,119 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Database Penilaian Siswa Kelas 7, 8, 9</title>
+  <title>Data Penilaian Siswa</title>
   <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin:0; }
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: 220px; background: #2d7ae0; color: #fff; padding-top: 32px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.04); z-index: 10;
+    }
+    .sidebar .brand { font-size: 1.24em; font-weight: bold; margin-bottom: 40px; text-align: center; letter-spacing: 1px;}
+    .sidebar nav { display: flex; flex-direction: column; gap: 6px;}
+    .sidebar nav a {
+      color: #fff; text-decoration: none; padding: 10px 28px; font-size: 1.05em;
+      border-radius: 0 20px 20px 0; transition: background 0.18s, color 0.18s; margin-right: 8px; display: block;
+    }
+    .sidebar nav a.active, .sidebar nav a:hover { background: #195ba6; color: #fff; }
+    .sidebar .logout-btn { margin: 20px 28px 0 28px; display: block; background: #fff; color: #195ba6; border: 1px solid #195ba6; padding: 8px 0; border-radius: 3px; text-align: center; cursor: pointer; font-size: 1em; transition: background 0.17s, color 0.17s; width: 85%; }
+    .sidebar .logout-btn:hover { background: #195ba6; color: #fff; }
+    .container-main {
+      margin-left: 240px; max-width: 950px; padding: 40px 30px; background: #fff;
+      min-height: 100vh; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);
+    }
     table, th, td { border: 1px solid #555; border-collapse: collapse; padding: 6px; }
     th { background: #eaeaea; }
-    input, select { padding: 3px; margin: 2px; }
-    .container { max-width: 900px; margin: 30px auto; font-family: Arial, sans-serif; }
+    input, select, textarea { padding: 3px; margin: 2px; }
+    textarea { resize: vertical; }
+    #form-penilaian { margin-bottom: 14px; }
+    @media (max-width:850px) {
+      .container-main { margin-left: 0; padding: 24px 4vw; }
+      .sidebar { position: static; width: 100%; display: flex; flex-direction: row; align-items: center; height: auto; box-shadow: none; }
+      .sidebar nav { flex-direction: row; gap: 0; }
+      .sidebar nav a { border-radius: 0; padding: 10px 18px; margin: 0; }
+      .sidebar .logout-btn { margin: 0 8px; width: unset; }
+    }
+    @media (max-width:700px){
+      .container-main { max-width: 100%; padding: 14px 2px; }
+      table { font-size: 0.93em; }
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>Database Penilaian Siswa</h2>
-  <form id="form-penilaian">
-    <label>Kelas:
-      <select id="kelas">
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-      </select>
-    </label>
-    <label>Nama Siswa: <input type="text" id="nama" required></label>
-    <label>Mapel: <input type="text" id="mapel" required></label>
-    <label>Nilai Harian: <input type="number" id="harian" min="0" max="100" required></label>
-    <label>Nilai Semester: <input type="number" id="semester" min="0" max="100" required></label>
-    <button type="submit">Tambah Data</button>
-  </form>
-
-  <br>
-  <button onclick="downloadCSV()">Unduh CSV</button>
-  <table id="tabel-penilaian">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Kelas</th>
-        <th>Nama Siswa</th>
-        <th>Mapel</th>
-        <th>Nilai Harian</th>
-        <th>Nilai Semester</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody>
-    <!-- Data akan ditampilkan di sini -->
-    </tbody>
-  </table>
-</div>
+  <div class="sidebar">
+    <div class="brand">Penilaian Siswa</div>
+    <nav>
+      <a href="index.html">Beranda</a>
+      <a href="penilaian.html" class="active">Data Penilaian</a>
+      <a href="siswa.html">Data Siswa</a>
+      <a href="guru.html">Data Guru</a>
+    </nav>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+  <div class="container-main">
+    <h2>Database Penilaian Siswa (Kurikulum Merdeka)</h2>
+    <form id="form-penilaian">
+      <label>Kelas:
+        <select id="kelas">
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select>
+      </label>
+      <label>Nama Siswa: <input type="text" id="nama" required></label>
+      <label>Mapel: <input type="text" id="mapel" required></label>
+      <label>Nilai Harian: <input type="number" id="harian" min="0" max="100" required></label>
+      <label>Nilai Semester: <input type="number" id="semester" min="0" max="100" required></label>
+      <label>Predikat:
+        <select id="predikat" required>
+          <option value="">Pilih...</option>
+          <option value="SB">Sangat Baik</option>
+          <option value="B">Baik</option>
+          <option value="C">Cukup</option>
+          <option value="PB">Perlu Bimbingan</option>
+        </select>
+      </label>
+      <label>Deskripsi Rapor:<br>
+        <textarea id="deskripsi" rows="2" style="width:90%;" placeholder="Deskripsi capaian, kekuatan dan saran pengembangan" required></textarea>
+      </label>
+      <button type="submit">Tambah Data</button>
+    </form>
+    <button id="download-btn" onclick="downloadCSV()">Unduh CSV</button>
+    <table id="tabel-penilaian" style="margin-top:10px; width:100%">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kelas</th>
+          <th>Nama Siswa</th>
+          <th>Mapel</th>
+          <th>Nilai Harian</th>
+          <th>Nilai Semester</th>
+          <th>Predikat</th>
+          <th>Deskripsi</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
 <script>
+if (!localStorage.getItem('login_user')) window.location.href = "login.html";
+
 let data = [];
 
 function updateTable() {
   const tbody = document.querySelector('#tabel-penilaian tbody');
   tbody.innerHTML = '';
   data.forEach((row, idx) => {
+    const pred = {
+      SB: "Sangat Baik",
+      B: "Baik",
+      C: "Cukup",
+      PB: "Perlu Bimbingan"
+    }[row.predikat] || row.predikat;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx+1}</td>
@@ -62,10 +123,13 @@ function updateTable() {
       <td>${row.mapel}</td>
       <td>${row.harian}</td>
       <td>${row.semester}</td>
+      <td>${pred}</td>
+      <td>${row.deskripsi.replace(/\n/g,"<br>")}</td>
       <td><button onclick="hapusData(${idx})">Hapus</button></td>
     `;
     tbody.appendChild(tr);
   });
+  saveLocal();
 }
 
 function hapusData(idx) {
@@ -82,27 +146,50 @@ document.getElementById('form-penilaian').addEventListener('submit', function(e)
   const mapel = document.getElementById('mapel').value.trim();
   const harian = document.getElementById('harian').value;
   const semester = document.getElementById('semester').value;
+  const predikat = document.getElementById('predikat').value;
+  const deskripsi = document.getElementById('deskripsi').value.trim();
 
-  data.push({kelas, nama, mapel, harian, semester});
+  data.push({kelas, nama, mapel, harian, semester, predikat, deskripsi});
   updateTable();
   this.reset();
 });
 
 function downloadCSV() {
-  let csv = 'No,Kelas,Nama Siswa,Mapel,Nilai Harian,Nilai Semester\n';
+  let csv = 'No,Kelas,Nama Siswa,Mapel,Nilai Harian,Nilai Semester,Predikat,Deskripsi\n';
   data.forEach((row, idx) => {
-    csv += `${idx+1},${row.kelas},"${row.nama}","${row.mapel}",${row.harian},${row.semester}\n`;
+    const pred = {
+      SB: "Sangat Baik",
+      B: "Baik",
+      C: "Cukup",
+      PB: "Perlu Bimbingan"
+    }[row.predikat] || row.predikat;
+    csv += `${idx+1},${row.kelas},"${row.nama}","${row.mapel}",${row.harian},${row.semester},"${pred}","${row.deskripsi.replace(/"/g,'""')}"\n`;
   });
   const blob = new Blob([csv], {type: 'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'penilaian_siswa.csv';
+  a.download = 'penilaian_siswa_merdeka.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
 }
 
+function saveLocal() { localStorage.setItem('penilaian_data', JSON.stringify(data)); }
+function loadLocal() {
+  data = [];
+  try {
+    const dt = localStorage.getItem('penilaian_data');
+    if (dt) data = JSON.parse(dt);
+  } catch(e){}
+}
+function logout() {
+  if (confirm("Anda yakin ingin logout?")) {
+    localStorage.removeItem('login_user');
+    window.location.href = "login.html";
+  }
+}
+loadLocal();
 updateTable();
 </script>
 </body>
