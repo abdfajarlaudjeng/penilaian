@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Database Penilaian Siswa Kelas 7, 8, 9</title>
+  <style>
+    table, th, td { border: 1px solid #555; border-collapse: collapse; padding: 6px; }
+    th { background: #eaeaea; }
+    input, select { padding: 3px; margin: 2px; }
+    .container { max-width: 900px; margin: 30px auto; font-family: Arial, sans-serif; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Database Penilaian Siswa</h2>
+  <form id="form-penilaian">
+    <label>Kelas:
+      <select id="kelas">
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+    </label>
+    <label>Nama Siswa: <input type="text" id="nama" required></label>
+    <label>Mapel: <input type="text" id="mapel" required></label>
+    <label>Nilai Harian: <input type="number" id="harian" min="0" max="100" required></label>
+    <label>Nilai Semester: <input type="number" id="semester" min="0" max="100" required></label>
+    <button type="submit">Tambah Data</button>
+  </form>
+
+  <br>
+  <button onclick="downloadCSV()">Unduh CSV</button>
+  <table id="tabel-penilaian">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Kelas</th>
+        <th>Nama Siswa</th>
+        <th>Mapel</th>
+        <th>Nilai Harian</th>
+        <th>Nilai Semester</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+    <!-- Data akan ditampilkan di sini -->
+    </tbody>
+  </table>
+</div>
+<script>
+let data = [];
+
+function updateTable() {
+  const tbody = document.querySelector('#tabel-penilaian tbody');
+  tbody.innerHTML = '';
+  data.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${row.kelas}</td>
+      <td>${row.nama}</td>
+      <td>${row.mapel}</td>
+      <td>${row.harian}</td>
+      <td>${row.semester}</td>
+      <td><button onclick="hapusData(${idx})">Hapus</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function hapusData(idx) {
+  if (confirm("Yakin ingin menghapus data ini?")) {
+    data.splice(idx, 1);
+    updateTable();
+  }
+}
+
+document.getElementById('form-penilaian').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const kelas = document.getElementById('kelas').value;
+  const nama = document.getElementById('nama').value.trim();
+  const mapel = document.getElementById('mapel').value.trim();
+  const harian = document.getElementById('harian').value;
+  const semester = document.getElementById('semester').value;
+
+  data.push({kelas, nama, mapel, harian, semester});
+  updateTable();
+  this.reset();
+});
+
+function downloadCSV() {
+  let csv = 'No,Kelas,Nama Siswa,Mapel,Nilai Harian,Nilai Semester\n';
+  data.forEach((row, idx) => {
+    csv += `${idx+1},${row.kelas},"${row.nama}","${row.mapel}",${row.harian},${row.semester}\n`;
+  });
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'penilaian_siswa.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+updateTable();
+</script>
+</body>
+</html>
