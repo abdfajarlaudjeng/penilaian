@@ -12,7 +12,7 @@
     .sidebar nav a.active, .sidebar nav a:hover { background: #195ba6; color: #fff; }
     .sidebar .logout-btn { margin: 20px 28px 0 28px; display: block; background: #fff; color: #195ba6; border: 1px solid #195ba6; padding: 8px 0; border-radius: 3px; text-align: center; cursor: pointer; font-size: 1em; transition: background 0.17s, color 0.17s; width: 85%; }
     .sidebar .logout-btn:hover { background: #195ba6; color: #fff; }
-    .container-main { margin-left: 240px; max-width: 950px; padding: 40px 30px; background: #fff; min-height: 100vh; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);}
+    .container-main { margin-left: 240px; max-width: 1050px; padding: 40px 30px; background: #fff; min-height: 100vh; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);}
     table, th, td { border: 1px solid #555; border-collapse: collapse; padding: 6px; }
     th { background: #eaeaea; }
     input, select { padding: 3px; margin: 2px; }
@@ -20,6 +20,8 @@
     .aksi-btn { margin-right:5px; }
     .aksi-btn[disabled] { background: #ccc; color: #777; cursor: not-allowed; }
     .error-msg { color: #c00; margin-bottom: 8px; font-size: .96em; }
+    .foto-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 1px solid #bbb; background: #eee; }
+    .foto-upload { display:inline-block; margin-right:8px; }
     @media (max-width:850px) {
       .container-main { margin-left: 0; padding: 24px 4vw; }
       .sidebar { position: static; width: 100%; display: flex; flex-direction: row; align-items: center; height: auto; box-shadow: none; }
@@ -58,12 +60,16 @@
           <option value="9">9</option>
         </select>
       </label>
+      <label class="foto-upload">Foto:
+        <input type="file" id="foto" accept="image/*">
+      </label>
       <button type="submit">Tambah Siswa</button>
     </form>
     <table id="tabel-siswa" style="margin-top:10px; width:100%">
       <thead>
         <tr>
           <th>No</th>
+          <th>Foto</th>
           <th>Nama</th>
           <th>NIS</th>
           <th>NISN</th>
@@ -93,6 +99,10 @@ function updateTable() {
     if (editIdx === idx) {
       tr.innerHTML = `
         <td>${idx+1}</td>
+        <td>
+          <img src="${row.foto ? row.foto : ''}" class="foto-thumb" id="edit-foto-preview-${idx}">
+          <input type="file" id="edit-foto-${idx}" accept="image/*" style="display:block;margin-top:3px;">
+        </td>
         <td><input value="${row.nama}" id="edit-nama"></td>
         <td><input value="${row.nis}" id="edit-nis"></td>
         <td><input value="${row.nisn}" id="edit-nisn" minlength="10" maxlength="10" pattern="\\d{10}" style="width:90px"></td>
@@ -108,9 +118,22 @@ function updateTable() {
           <button class="aksi-btn" onclick="batalEdit()">Batal</button>
         </td>
       `;
+      setTimeout(() => {
+        document.getElementById(`edit-foto-${idx}`).addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+              document.getElementById(`edit-foto-preview-${idx}`).src = ev.target.result;
+            }
+            reader.readAsDataURL(file);
+          }
+        });
+      }, 10);
     } else {
       tr.innerHTML = `
         <td>${idx+1}</td>
+        <td>${row.foto ? `<img src="${row.foto}" class="foto-thumb">` : ''}</td>
         <td>${row.nama}</td>
         <td>${row.nis}</td>
         <td>${row.nisn}</td>
@@ -138,13 +161,28 @@ function simpanEdit(idx) {
   let nis = document.getElementById('edit-nis').value.trim();
   let nisn = document.getElementById('edit-nisn').value.trim();
   let kelas = document.getElementById('edit-kelas').value;
-  if (!isValidNISN(nisn)) {
-    alert("NISN harus 10 digit angka!");
-    return;
+  let foto = siswa[idx].foto;
+  const fileInput = document.getElementById(`edit-foto-${idx}`);
+  if (fileInput && fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      foto = ev.target.result;
+      finishEdit();
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    finishEdit();
   }
-  siswa[idx] = {nama, nis, nisn, kelas};
-  editIdx = -1;
-  updateTable();
+
+  function finishEdit() {
+    if (!isValidNISN(nisn)) {
+      alert("NISN harus 10 digit angka!");
+      return;
+    }
+    siswa[idx] = {nama, nis, nisn, kelas, foto};
+    editIdx = -1;
+    updateTable();
+  }
 }
 function hapusSiswa(idx) {
   if (confirm("Yakin ingin menghapus data ini?")) {
@@ -159,6 +197,7 @@ document.getElementById('form-siswa').addEventListener('submit', function(e) {
   const nis = document.getElementById('nis').value.trim();
   const nisn = document.getElementById('nisn').value.trim();
   const kelas = document.getElementById('kelas').value;
+  const fotoInput = document.getElementById('foto');
   const errorDiv = document.getElementById('form-error');
   errorDiv.textContent = "";
   if (!isValidNISN(nisn)) {
@@ -166,7 +205,19 @@ document.getElementById('form-siswa').addEventListener('submit', function(e) {
     document.getElementById('nisn').focus();
     return;
   }
-  siswa.push({nama, nis, nisn, kelas});
+  let foto = "";
+  if (fotoInput.files && fotoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      foto = ev.target.result;
+      siswa.push({nama, nis, nisn, kelas, foto});
+      updateTable();
+      document.getElementById('form-siswa').reset();
+    }
+    reader.readAsDataURL(fotoInput.files[0]);
+    return; // stop here, push after FileReader
+  }
+  siswa.push({nama, nis, nisn, kelas, foto});
   updateTable();
   this.reset();
 });
