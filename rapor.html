@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Cetak Rapor Pendidikan</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin:0; }
+    .container-main { max-width: 800px; margin: 30px auto; background: #fff; padding: 26px 32px; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);}
+    h2 { text-align: center; }
+    label { margin-right: 12px;}
+    table, th, td { border: 1px solid #333; border-collapse: collapse; padding: 5px 9px; }
+    th { background: #eaeaea; }
+    .print-btn { margin: 18px 0 20px 0; padding: 8px 18px; font-size: 1em; border-radius: 3px; border:1px solid #3888ee; background:#3888ee; color:#fff; cursor:pointer;}
+    .ttd-blok { width:98%; margin:auto; display:flex; justify-content:space-between; margin-top:38px; }
+    .ttd-col { width:30%; text-align:center; }
+    .ttd-space { height:70px; }
+    .nama-ttd { margin-top: 52px; font-weight: bold; text-decoration: underline;}
+    .nip-ttd { font-size:.97em; margin-top:2px;}
+    @media print {
+        .no-print, .no-print * { display: none !important; }
+        .container-main { box-shadow: none; border-radius: 0; }
+        body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container-main">
+    <h2>Rapor Pendidikan Siswa</h2>
+    <form id="form-filter" class="no-print" style="margin-bottom:18px;">
+      <label>Kelas:
+        <select id="kelas">
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select>
+      </label>
+      <label>Semester:
+        <select id="semester">
+          <option value="Ganjil">Ganjil</option>
+          <option value="Genap">Genap</option>
+        </select>
+      </label>
+      <label>Nama Siswa:
+        <select id="nama_siswa"></select>
+      </label>
+      <br>
+      <label>Nama Wali Kelas:
+        <input type="text" id="wali_kelas" value="(Nama Wali Kelas)" required>
+      </label>
+      <label>Nama Kepala Sekolah:
+        <input type="text" id="kepala_sekolah" value="(Nama Kepala Sekolah)" required>
+      </label>
+      <label>NIP Kepala Sekolah:
+        <input type="text" id="nip_kepsek" value="-" required>
+      </label>
+      <button type="submit">Tampilkan</button>
+    </form>
+    <button class="print-btn no-print" onclick="window.print()">Cetak Rapor</button>
+    <div id="rapor-hasil"></div>
+  </div>
+<script>
+if (!localStorage.getItem('login_user')) window.location.href = "login.html";
+
+let penilaian = [];
+let siswa = [];
+
+function loadSiswa() {
+  try {
+    const dt = localStorage.getItem('data_siswa');
+    siswa = dt ? JSON.parse(dt) : [];
+  } catch(e){ siswa = []; }
+}
+function loadPenilaian() {
+  try {
+    const dt = localStorage.getItem('penilaian_data');
+    penilaian = dt ? JSON.parse(dt) : [];
+  } catch(e){ penilaian = []; }
+}
+
+function fillNamaSiswa() {
+  const kelas = document.getElementById('kelas').value;
+  const select = document.getElementById('nama_siswa');
+  select.innerHTML = "";
+  siswa.filter(s => s.kelas == kelas).forEach(s => {
+    select.innerHTML += `<option value="${s.nama.replace(/"/g, "&quot;")}">${s.nama}</option>`;
+  });
+}
+
+document.getElementById('kelas').addEventListener('change', fillNamaSiswa);
+
+document.getElementById('form-filter').addEventListener('submit', function(e){
+  e.preventDefault();
+  tampilkanRapor();
+});
+
+function tampilkanRapor() {
+  const kelas = document.getElementById('kelas').value;
+  const semester = document.getElementById('semester').value;
+  const nama = document.getElementById('nama_siswa').value;
+  const wali_kelas = document.getElementById('wali_kelas').value;
+  const kepala_sekolah = document.getElementById('kepala_sekolah').value;
+  const nip_kepsek = document.getElementById('nip_kepsek').value;
+
+  // Filter penilaian untuk siswa, kelas dan semester (semester bisa dari data penilaian atau berdasarkan pengisian data)
+  // Untuk contoh ini, asumsikan semester didapat dari Nilai Semester: <50 = Ganjil, >=50 = Genap (atau sesuaikan dengan data Anda)
+  let data = penilaian.filter(p =>
+    p.kelas==kelas && p.nama==nama &&
+    ((semester==='Ganjil' && (p.semester < 50 || p.semester==="" || isNaN(p.semester))) ||
+     (semester==='Genap' && p.semester >= 50))
+  );
+  if (data.length === 0) {
+    document.getElementById('rapor-hasil').innerHTML = "<p>Tidak ada data penilaian untuk filter ini.</p>";
+    return;
+  }
+  let html = `
+    <h3 style="text-align:center;margin-top:0;">Nama: ${nama}<br>Kelas: ${kelas} | Semester: ${semester}</h3>
+    <table style="width:100%;margin-top:6px;">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Mata Pelajaran</th>
+          <th>Nilai Harian</th>
+          <th>Nilai Semester</th>
+          <th>Predikat</th>
+          <th>Deskripsi Rapor</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  data.forEach((row, idx) => {
+    const pred = {SB:"Sangat Baik", B:"Baik", C:"Cukup", PB:"Perlu Bimbingan"}[row.predikat] || row.predikat;
+    html += `
+      <tr>
+        <td>${idx+1}</td>
+        <td>${row.mapel}</td>
+        <td>${row.harian}</td>
+        <td>${row.semester}</td>
+        <td>${pred}</td>
+        <td>${row.deskripsi.replace(/\n/g,"<br>")}</td>
+      </tr>
+    `;
+  });
+  html += `</tbody></table>`;
+
+  // Tanda tangan section
+  html += `
+    <div class="ttd-blok">
+      <div class="ttd-col">
+        <div>Wali Kelas</div>
+        <div class="ttd-space"></div>
+        <div class="nama-ttd">${wali_kelas}</div>
+      </div>
+      <div class="ttd-col">
+        <div>Orang Tua/Wali</div>
+        <div class="ttd-space"></div>
+        <div class="nama-ttd">&nbsp;</div>
+      </div>
+      <div class="ttd-col">
+        <div>Kepala Sekolah</div>
+        <div class="ttd-space"></div>
+        <div class="nama-ttd">${kepala_sekolah}</div>
+        <div class="nip-ttd">NIP. ${nip_kepsek}</div>
+      </div>
+    </div>
+    <br>
+  `;
+
+  document.getElementById('rapor-hasil').innerHTML = html;
+}
+
+function init() {
+  loadSiswa();
+  loadPenilaian();
+  fillNamaSiswa();
+}
+init();
+</script>
+</body>
+</html>
