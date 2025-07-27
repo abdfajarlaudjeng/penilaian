@@ -18,6 +18,7 @@
     input, select { padding: 3px; margin: 2px; }
     #absensi-form { margin-bottom: 22px; }
     .aksi-btn { margin-right:5px; }
+    #unduh-csv-btn { margin-top:8px; margin-bottom:18px; }
     @media (max-width:850px) {
       .container-main { margin-left: 0; padding: 24px 4vw; }
       .sidebar { position: static; width: 100%; display: flex; flex-direction: row; align-items: center; height: auto; box-shadow: none; }
@@ -74,6 +75,7 @@
       <button id="simpan-absensi" type="submit" style="margin-top:10px;">Simpan Absensi</button>
     </form>
     <h3 style="margin-top:32px;">Rekap Absensi</h3>
+    <button id="unduh-csv-btn" onclick="downloadCSVAbsensi(event)">Unduh CSV Rekap Absensi</button>
     <table id="rekap-absensi" style="width:100%;margin-top:8px;">
       <thead>
         <tr>
@@ -127,6 +129,26 @@ function tampilRekap() {
     `;
     tbody.appendChild(tr);
   });
+}
+
+function downloadCSVAbsensi(e) {
+  e.preventDefault();
+  if (absensi.length === 0) {
+    alert('Belum ada data absensi!');
+    return;
+  }
+  let csv = 'No,Tanggal,Kelas,Nama Siswa,NIS,NISN,Kehadiran\n';
+  absensi.forEach((row, idx) => {
+    csv += `${idx+1},"${row.tanggal}","${row.kelas}","${row.nama.replace(/"/g,'""')}","${row.nis}","${row.nisn}","${row.kehadiran}"\n`;
+  });
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rekap_absensi.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 document.getElementById('absensi-form').addEventListener('submit', function(e){
