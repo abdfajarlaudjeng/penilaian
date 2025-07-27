@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Login Penilaian Siswa</title>
+  <title>Login Sistem Informasi PENilaian, Absensi, dan Guru</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f3f3f3; }
     .login-container {
@@ -12,6 +12,28 @@
       padding: 30px 28px 20px 28px;
       border-radius: 6px;
       box-shadow: 0 3px 12px rgba(0,0,0,0.11);
+    }
+    .logo-sekolah {
+      display: block;
+      margin: 0 auto 12px auto;
+      width: 74px;
+      height: 74px;
+      object-fit: contain;
+    }
+    .nama-sekolah {
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #195ba6;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+    .nama-sistem {
+      text-align: center;
+      font-size: 1.08em;
+      color: #333;
+      margin-bottom: 18px;
+      font-weight: 500;
     }
     h2 { text-align: center; margin-bottom: 20px; }
     label { display: block; margin-bottom: 8px; }
@@ -29,6 +51,10 @@
 </head>
 <body>
   <div class="login-container">
+    <!-- Ganti src dengan logo sekolah Anda jika ada -->
+    <img src="logo_smpn10bs.png" alt="Logo Sekolah" class="logo-sekolah" onerror="this.style.display='none'">
+    <div class="nama-sekolah">SMP NEGERI 10 BANAWA SELATAN</div>
+    <div class="nama-sistem">SIPENAG<br><span style="font-size:.97em;font-weight:normal;">(Sistem Informasi PENilaian, Absensi, dan Guru)</span></div>
     <h2>Login</h2>
     <form id="login-form" autocomplete="off">
       <div class="error" id="error-msg" style="display:none"></div>
