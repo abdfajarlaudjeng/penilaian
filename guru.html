@@ -41,13 +41,12 @@
 </head>
 <body>
   <div class="sidebar">
-     <div class="sidebar">
-    <div class="brand">Sistem Informasi PENilaian, Absensi, dan Guru<</div>
+    <div class="brand">Sistem Informasi PENilaian, Absensi, dan Guru</div>
     <nav>
-      <a href="index.html" class="active">Beranda</a>
+      <a href="index.html">Beranda</a>
       <a href="penilaian.html">Data Penilaian</a>
       <a href="siswa.html">Data Siswa</a>
-      <a href="guru.html">Data Guru</a>
+      <a href="guru.html" class="active">Data Guru</a>
       <a href="absensi.html">Absensi Siswa</a>
       <a href="absensi_guru.html">Absensi Guru</a>
     </nav>
@@ -58,7 +57,7 @@
     <form id="form-guru">
       <label>Nama Guru: <input type="text" id="nama" required></label>
       <label>NIP: <input type="text" id="nip" required></label>
-      <label>NUPTK: <input type="text" id="nuptk" maxlength="16" minlength="8" pattern="\\d*" required></label>
+      <label>NUPTK: <input type="text" id="nuptk" maxlength="16" minlength="8" pattern="\d*" required></label>
       <label>Status Kepegawaian:
         <select id="status_kepegawaian" required>
           <option value="ASN">ASN</option>
