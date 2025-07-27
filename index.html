@@ -4,68 +4,132 @@
   <meta charset="UTF-8">
   <title>Dashboard Penilaian Siswa</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f8f8f8; }
-    .navbar {
-      background: #2d7ae0; color: #fff; padding: 10px 0;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    body { margin:0; font-family: Arial, sans-serif; background: #f8f8f8; }
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: 220px;
+      background: #2d7ae0;
+      color: #fff;
+      padding-top: 32px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.04);
+      z-index: 10;
     }
-    .navbar .container {
-      display: flex; align-items: center; max-width: 980px; margin: 0 auto; padding: 0 16px; justify-content: space-between;
+    .sidebar .brand {
+      font-size: 1.24em;
+      font-weight: bold;
+      margin-bottom: 40px;
+      text-align: center;
+      letter-spacing: 1px;
     }
-    .navbar .brand { font-weight: bold; font-size: 1.2em; letter-spacing: 1px; }
-    .navbar nav a {
-      color: #fff; text-decoration: none; margin-left: 18px; font-size: 1em; transition: color 0.2s;
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .navbar nav a:hover { text-decoration: underline; color: #d7eaff; }
-    .content {
-      max-width: 980px; margin: 32px auto;
-      background: #fff; padding: 32px 22px 22px 22px; border-radius: 7px;
-      box-shadow: 0 3px 18px rgba(0,0,0,0.07); min-height: 400px;
+    .sidebar nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 28px;
+      font-size: 1.05em;
+      border-radius: 0 20px 20px 0;
+      transition: background 0.18s, color 0.18s;
+      margin-right: 8px;
+      display: block;
     }
-    .welcome { font-size: 1.15em; margin-bottom: 16px; }
+    .sidebar nav a.active, .sidebar nav a:hover {
+      background: #195ba6;
+      color: #fff;
+    }
+    .sidebar .logout-btn {
+      margin: 20px 28px 0 28px;
+      display: block;
+      background: #fff;
+      color: #195ba6;
+      border: 1px solid #195ba6;
+      padding: 8px 0;
+      border-radius: 3px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.17s, color 0.17s;
+      width: 85%;
+    }
+    .sidebar .logout-btn:hover {
+      background: #195ba6; color: #fff;
+    }
+    .main-content {
+      margin-left: 240px;
+      padding: 40px 30px;
+      min-height: 100vh;
+      background: #f8f8f8;
+    }
+    .welcome {
+      font-size: 1.18em;
+      margin-bottom: 24px;
+    }
+    .menu-card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
     .menu-card {
-      display: inline-block; vertical-align: top; width: 220px; margin: 18px;
-      padding: 20px 16px; background: #f3f7ff; border-radius: 7px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.07); text-align: center;
+      flex: 1 1 200px;
+      min-width: 220px;
+      max-width: 270px;
+      background: #fff;
+      border-radius: 7px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 22px 18px;
+      text-align: center;
       transition: box-shadow 0.2s;
     }
-    .menu-card:hover { box-shadow: 0 6px 22px rgba(45,122,224,0.14); }
+    .menu-card:hover {
+      box-shadow: 0 6px 22px rgba(45,122,224,0.14);
+    }
     .menu-card h3 { margin: 0 0 10px 0; font-size: 1.13em; color: #2d7ae0; }
-    .menu-card p { font-size: .99em; color: #555; margin-bottom: 12px; }
+    .menu-card p { font-size: .99em; color: #555; margin-bottom: 16px; }
     .menu-card a {
-      display: inline-block; background: #2d7ae0; color: #fff;
-      text-decoration: none; padding: 7px 18px; border-radius: 4px;
-      font-size: .97em; transition: background 0.2s;
+      display: inline-block;
+      background: #2d7ae0;
+      color: #fff;
+      text-decoration: none;
+      padding: 7px 18px;
+      border-radius: 4px;
+      font-size: .97em;
+      transition: background 0.2s;
     }
-    .menu-card a:hover { background: #195ba6; }
-    .logout-btn {
-      background: #fff; color: #195ba6; border: 1px solid #195ba6;
-      padding: 6px 16px; border-radius: 3px; cursor: pointer; margin-left: 22px;
-      font-size: .97em; transition: background 0.18s, color 0.18s;
+    .menu-card a:hover {
+      background: #195ba6;
     }
-    .logout-btn:hover { background: #195ba6; color: #fff; }
-    @media (max-width:600px){
-      .navbar .container, .content { max-width: 100%; padding: 0 8px; }
-      .menu-card { width: 95%; margin: 10px 0; }
+    @media (max-width:850px) {
+      .main-content { margin-left: 0; padding: 24px 4vw; }
+      .sidebar { position: static; width: 100%; display: flex; flex-direction: row; align-items: center; height: auto; box-shadow: none; }
+      .sidebar nav { flex-direction: row; gap: 0; }
+      .sidebar nav a { border-radius: 0; padding: 10px 18px; margin: 0; }
+      .sidebar .logout-btn { margin: 0 8px; width: unset; }
+      .menu-card-container { flex-direction: column; gap: 18px; }
+    }
+    @media (max-width:600px) {
+      .main-content { padding: 16px 2vw; }
+      .menu-card { min-width: 90vw; max-width: 99vw; }
     }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <div class="container">
-      <span class="brand">Database Penilaian Siswa</span>
-      <nav>
-        <a href="index.html">Beranda</a>
-        <a href="penilaian.html">Data Penilaian</a>
-        <a href="siswa.html">Data Siswa</a>
-        <a href="guru.html">Data Guru</a>
-        <a href="#" id="logout-link" onclick="logout(); return false;">Logout</a>
-      </nav>
-    </div>
+  <div class="sidebar">
+    <div class="brand">Penilaian Siswa</div>
+    <nav>
+      <a href="index.html" class="active">Beranda</a>
+      <a href="penilaian.html">Data Penilaian</a>
+      <a href="siswa.html">Data Siswa</a>
+      <a href="guru.html">Data Guru</a>
+    </nav>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
-  <div class="content">
+  <div class="main-content">
     <div class="welcome" id="welcome"></div>
-    <div>
+    <div class="menu-card-container">
       <div class="menu-card">
         <h3>Entri Penilaian</h3>
         <p>Tambah data penilaian siswa kelas 7, 8, atau 9 secara mudah.</p>
@@ -73,7 +137,7 @@
       </div>
       <div class="menu-card">
         <h3>Data Siswa</h3>
-        <p>Kelola data siswa (identitas, kelas, dll) yang mengikuti penilaian.</p>
+        <p>Kelola data siswa yang mengikuti penilaian.</p>
         <a href="siswa.html">Kelola Siswa</a>
       </div>
       <div class="menu-card">
@@ -86,20 +150,12 @@
         <p>Ekspor seluruh data penilaian siswa ke file CSV untuk dokumentasi atau rekap.</p>
         <a href="penilaian.html#download" onclick="setTimeout(() => { document.getElementById('download-btn')?.click(); }, 200);">Unduh CSV</a>
       </div>
-      <div class="menu-card">
-        <h3>Logout</h3>
-        <p>Keluar dari sistem untuk menjaga keamanan data penilaian siswa.</p>
-        <a href="#" onclick="logout(); return false;" style="background:#fff; color:#2d7ae0; border:1px solid #2d7ae0;">Logout</a>
-      </div>
     </div>
   </div>
   <script>
-    if (!localStorage.getItem('login_user')) {
-      window.location.href = "login.html";
-    }
-    const user = localStorage.getItem('login_user');
-    document.getElementById('welcome').textContent = user ? `Selamat datang, ${user}!` : '';
-
+    if (!localStorage.getItem('login_user')) window.location.href = "login.html";
+    document.getElementById('welcome').textContent =
+      "Selamat datang, " + (localStorage.getItem('login_user') || "") + "!";
     function logout() {
       if (confirm("Anda yakin ingin logout?")) {
         localStorage.removeItem('login_user');
