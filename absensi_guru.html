@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Absensi Guru Mata Pelajaran</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin:0; }
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: #2d7ae0; color: #fff; padding-top: 32px; box-shadow: 2px 0 10px rgba(0,0,0,0.04); z-index: 10; }
+    .sidebar .brand { font-size: 1.24em; font-weight: bold; margin-bottom: 40px; text-align: center; letter-spacing: 1px;}
+    .sidebar nav { display: flex; flex-direction: column; gap: 6px;}
+    .sidebar nav a { color: #fff; text-decoration: none; padding: 10px 28px; font-size: 1.05em; border-radius: 0 20px 20px 0; transition: background 0.18s, color 0.18s; margin-right: 8px; display: block;}
+    .sidebar nav a.active, .sidebar nav a:hover { background: #195ba6; color: #fff; }
+    .sidebar .logout-btn { margin: 20px 28px 0 28px; display: block; background: #fff; color: #195ba6; border: 1px solid #195ba6; padding: 8px 0; border-radius: 3px; text-align: center; cursor: pointer; font-size: 1em; transition: background 0.17s, color 0.17s; width: 85%; }
+    .sidebar .logout-btn:hover { background: #195ba6; color: #fff; }
+    .container-main { margin-left: 240px; max-width: 1050px; padding: 40px 30px; background: #fff; min-height: 100vh; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);}
+    table, th, td { border: 1px solid #555; border-collapse: collapse; padding: 6px; }
+    th { background: #eaeaea; }
+    input, select, textarea { padding: 3px; margin: 2px; }
+    textarea { resize: vertical; }
+    #form-absen-guru { margin-bottom: 18px; }
+    .aksi-btn { margin-right:5px; }
+    .aksi-btn[disabled] { background: #ccc; color: #777; cursor: not-allowed; }
+    .foto-thumb { width: 60px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid #bbb; background: #eee; display: block; margin: 0 auto; }
+    #absensi-guru-rekap th, #absensi-guru-rekap td { text-align:center; }
+    .foto-upload { display:inline-block; margin-right:8px; }
+    @media (max-width:850px) {
+      .container-main { margin-left: 0; padding: 24px 4vw; }
+      .sidebar { position: static; width: 100%; display: flex; flex-direction: row; align-items: center; height: auto; box-shadow: none; }
+      .sidebar nav { flex-direction: row; gap: 0; }
+      .sidebar nav a { border-radius: 0; padding: 10px 18px; margin: 0; }
+      .sidebar .logout-btn { margin: 0 8px; width: unset; }
+    }
+    @media (max-width:700px){
+      .container-main { max-width: 100%; padding: 14px 2px; }
+      table { font-size: 0.93em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="brand">Penilaian Siswa</div>
+    <nav>
+      <a href="index.html">Beranda</a>
+      <a href="penilaian.html">Data Penilaian</a>
+      <a href="siswa.html">Data Siswa</a>
+      <a href="guru.html">Data Guru</a>
+      <a href="absensi.html">Absensi Siswa</a>
+      <a href="absensi_guru.html" class="active">Absensi Guru Mapel</a>
+    </nav>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+  <div class="container-main">
+    <h2>Absensi Guru Mata Pelajaran</h2>
+    <form id="form-absen-guru" autocomplete="off">
+      <label>Tanggal: <input type="date" id="tanggal" required></label>
+      <label>Nama Guru:
+        <select id="nama_guru" required></select>
+      </label>
+      <label>Mata Pelajaran:
+        <input type="text" id="mapel" required>
+      </label>
+      <label>Kelas:
+        <select id="kelas" required>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select>
+      </label>
+      <label>Mulai Mengajar: <input type="time" id="jam_mulai" required></label>
+      <label>Selesai Mengajar: <input type="time" id="jam_selesai" required></label>
+      <label>Sub Materi:
+        <textarea id="sub_materi" rows="2" style="width:200px;" required></textarea>
+      </label>
+      <label>Jumlah Siswa Hadir: <input type="number" id="jumlah_hadir" min="0" required></label>
+      <label class="foto-upload">Foto Dokumentasi:
+        <input type="file" id="foto_dok" accept="image/*" required>
+      </label>
+      <button type="submit">Simpan Absensi Guru</button>
+    </form>
+
+    <h3 style="margin-top:32px;">Rekap Absensi Guru Mata Pelajaran</h3>
+    <button id="unduh-csv-btn" onclick="downloadCSVAbsensiGuru(event)">Unduh CSV Rekap Absensi Guru</button>
+    <table id="absensi-guru-rekap" style="width:100%;margin-top:8px;">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Tanggal</th>
+          <th>Nama Guru</th>
+          <th>Mata Pelajaran</th>
+          <th>Kelas</th>
+          <th>Mulai</th>
+          <th>Selesai</th>
+          <th>Sub Materi</th>
+          <th>Jumlah Hadir</th>
+          <th>Foto Dokumentasi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+<script>
+if (!localStorage.getItem('login_user')) window.location.href = "login.html";
+
+let absenGuru = [];
+let guruList = [];
+
+function loadGuru() {
+  // Ambil dari data_guru di localStorage
+  try {
+    const dt = localStorage.getItem('data_guru');
+    if (dt) guruList = JSON.parse(dt);
+    else guruList = [];
+  } catch(e){ guruList = []; }
+  const selectGuru = document.getElementById('nama_guru');
+  selectGuru.innerHTML = '<option value="" disabled selected>Pilih Guru</option>';
+  guruList.forEach(g => {
+    selectGuru.innerHTML += '<option value="'+g.nama.replace(/"/g,"&quot;")+'">'+g.nama+'</option>';
+  });
+}
+
+function saveAbsenGuru() {
+  localStorage.setItem('data_absensi_guru', JSON.stringify(absenGuru));
+}
+
+function loadAbsenGuru() {
+  try {
+    const dt = localStorage.getItem('data_absensi_guru');
+    if (dt) absenGuru = JSON.parse(dt);
+    else absenGuru = [];
+  } catch(e){ absenGuru = []; }
+}
+
+function tampilRekapGuru() {
+  const tbody = document.querySelector('#absensi-guru-rekap tbody');
+  tbody.innerHTML = '';
+  absenGuru.forEach((row, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${row.tanggal}</td>
+      <td>${row.nama_guru}</td>
+      <td>${row.mapel}</td>
+      <td>${row.kelas}</td>
+      <td>${row.jam_mulai}</td>
+      <td>${row.jam_selesai}</td>
+      <td>${row.sub_materi.replace(/\n/g,"<br>")}</td>
+      <td>${row.jumlah_hadir}</td>
+      <td>
+        ${row.foto_dok ? `<img src="${row.foto_dok}" class="foto-thumb">` : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function downloadCSVAbsensiGuru(e){
+  e.preventDefault();
+  if (absenGuru.length === 0) {
+    alert('Belum ada data absensi guru!');
+    return;
+  }
+  let csv = 'No,Tanggal,Nama Guru,Mata Pelajaran,Kelas,Mulai,Selesai,Sub Materi,Jumlah Hadir\n';
+  absenGuru.forEach((row, idx) => {
+    csv += `${idx+1},"${row.tanggal}","${row.nama_guru.replace(/"/g,'""')}","${row.mapel.replace(/"/g,'""')}","${row.kelas}","${row.jam_mulai}","${row.jam_selesai}","${row.sub_materi.replace(/"/g,'""').replace(/\n/g, " ")}","${row.jumlah_hadir}"\n`;
+  });
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rekap_absensi_guru.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+document.getElementById('form-absen-guru').addEventListener('submit', function(e){
+  e.preventDefault();
+  const tanggal = document.getElementById('tanggal').value;
+  const nama_guru = document.getElementById('nama_guru').value;
+  const mapel = document.getElementById('mapel').value.trim();
+  const kelas = document.getElementById('kelas').value;
+  const jam_mulai = document.getElementById('jam_mulai').value;
+  const jam_selesai = document.getElementById('jam_selesai').value;
+  const sub_materi = document.getElementById('sub_materi').value.trim();
+  const jumlah_hadir = document.getElementById('jumlah_hadir').value;
+  const fotoInput = document.getElementById('foto_dok');
+  if (!tanggal || !nama_guru || !mapel || !kelas || !jam_mulai || !jam_selesai || !sub_materi || !jumlah_hadir || !fotoInput.files[0]) {
+    alert("Semua kolom harus diisi dan foto harus diupload!");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const foto_dok = ev.target.result;
+    absenGuru.push({tanggal, nama_guru, mapel, kelas, jam_mulai, jam_selesai, sub_materi, jumlah_hadir, foto_dok});
+    saveAbsenGuru();
+    tampilRekapGuru();
+    document.getElementById('form-absen-guru').reset();
+    alert("Absensi guru berhasil disimpan!");
+  }
+  reader.readAsDataURL(fotoInput.files[0]);
+});
+
+function logout() {
+  if (confirm("Anda yakin ingin logout?")) {
+    localStorage.removeItem('login_user');
+    window.location.href = "login.html";
+  }
+}
+
+// Inisialisasi
+loadGuru();
+loadAbsenGuru();
+tampilRekapGuru();
+</script>
+</body>
+</html>
