@@ -43,7 +43,6 @@
       <a href="penilaian.html">Data Penilaian</a>
       <a href="siswa.html" class="active">Data Siswa</a>
       <a href="guru.html">Data Guru</a>
-      <a href="absensi.html">Absensi Siswa</a>
     </nav>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
@@ -53,7 +52,7 @@
       <div class="error-msg" id="form-error"></div>
       <label>Nama Siswa: <input type="text" id="nama" required></label>
       <label>NIS: <input type="text" id="nis" required></label>
-      <label>NISN: <input type="text" id="nisn" minlength="10" maxlength="10" pattern="\\d{10}" required placeholder="10 digit angka"></label>
+      <label>NISN: <input type="text" id="nisn" pattern="\d{10}" required placeholder="10 digit angka"></label>
       <label>Kelas:
         <select id="kelas">
           <option value="7">7</option>
@@ -88,6 +87,7 @@ if (!localStorage.getItem('login_user')) window.location.href = "login.html";
 let siswa = [];
 let editIdx = -1;
 
+// Validasi hanya 10 digit angka
 function isValidNISN(nisn) {
   return /^\d{10}$/.test(nisn);
 }
@@ -106,7 +106,7 @@ function updateTable() {
         </td>
         <td><input value="${row.nama}" id="edit-nama"></td>
         <td><input value="${row.nis}" id="edit-nis"></td>
-        <td><input value="${row.nisn}" id="edit-nisn" minlength="10" maxlength="10" pattern="\\d{10}" style="width:90px"></td>
+        <td><input value="${row.nisn}" id="edit-nisn" pattern="\\d{10}" style="width:90px"></td>
         <td>
           <select id="edit-kelas">
             <option value="7"${row.kelas=='7'?' selected':''}>7</option>
