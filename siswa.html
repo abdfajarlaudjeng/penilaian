@@ -5,28 +5,20 @@
   <title>Data Siswa</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f8f8f8; margin:0; }
-    .sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0;
-      width: 220px; background: #2d7ae0; color: #fff; padding-top: 32px;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.04); z-index: 10;
-    }
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: #2d7ae0; color: #fff; padding-top: 32px; box-shadow: 2px 0 10px rgba(0,0,0,0.04); z-index: 10; }
     .sidebar .brand { font-size: 1.24em; font-weight: bold; margin-bottom: 40px; text-align: center; letter-spacing: 1px;}
     .sidebar nav { display: flex; flex-direction: column; gap: 6px;}
-    .sidebar nav a {
-      color: #fff; text-decoration: none; padding: 10px 28px; font-size: 1.05em;
-      border-radius: 0 20px 20px 0; transition: background 0.18s, color 0.18s; margin-right: 8px; display: block;
-    }
+    .sidebar nav a { color: #fff; text-decoration: none; padding: 10px 28px; font-size: 1.05em; border-radius: 0 20px 20px 0; transition: background 0.18s, color 0.18s; margin-right: 8px; display: block;}
     .sidebar nav a.active, .sidebar nav a:hover { background: #195ba6; color: #fff; }
     .sidebar .logout-btn { margin: 20px 28px 0 28px; display: block; background: #fff; color: #195ba6; border: 1px solid #195ba6; padding: 8px 0; border-radius: 3px; text-align: center; cursor: pointer; font-size: 1em; transition: background 0.17s, color 0.17s; width: 85%; }
     .sidebar .logout-btn:hover { background: #195ba6; color: #fff; }
-    .container-main {
-      margin-left: 240px; max-width: 950px; padding: 40px 30px; background: #fff;
-      min-height: 100vh; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);
-    }
+    .container-main { margin-left: 240px; max-width: 950px; padding: 40px 30px; background: #fff; min-height: 100vh; border-radius: 7px; box-shadow: 0 3px 18px rgba(0,0,0,0.07);}
     table, th, td { border: 1px solid #555; border-collapse: collapse; padding: 6px; }
     th { background: #eaeaea; }
     input, select { padding: 3px; margin: 2px; }
     #form-siswa { margin-bottom: 14px; }
+    .aksi-btn { margin-right:5px; }
+    .aksi-btn[disabled] { background: #ccc; color: #777; cursor: not-allowed; }
     @media (max-width:850px) {
       .container-main { margin-left: 0; padding: 24px 4vw; }
       .sidebar { position: static; width: 100%; display: flex; flex-direction: row; align-items: center; height: auto; box-shadow: none; }
@@ -83,25 +75,66 @@
 if (!localStorage.getItem('login_user')) window.location.href = "login.html";
 
 let siswa = [];
+let editIdx = -1;
+
 function updateTable() {
   const tbody = document.querySelector('#tabel-siswa tbody');
   tbody.innerHTML = '';
   siswa.forEach((row, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${idx+1}</td>
-      <td>${row.nama}</td>
-      <td>${row.nis}</td>
-      <td>${row.kelas}</td>
-      <td><button onclick="hapusSiswa(${idx})">Hapus</button></td>
-    `;
+    let tr = document.createElement('tr');
+    if (editIdx === idx) {
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td><input value="${row.nama}" id="edit-nama"></td>
+        <td><input value="${row.nis}" id="edit-nis"></td>
+        <td>
+          <select id="edit-kelas">
+            <option value="7"${row.kelas=='7'?' selected':''}>7</option>
+            <option value="8"${row.kelas=='8'?' selected':''}>8</option>
+            <option value="9"${row.kelas=='9'?' selected':''}>9</option>
+          </select>
+        </td>
+        <td>
+          <button class="aksi-btn" onclick="simpanEdit(${idx})">Simpan</button>
+          <button class="aksi-btn" onclick="batalEdit()">Batal</button>
+        </td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td>${row.nama}</td>
+        <td>${row.nis}</td>
+        <td>${row.kelas}</td>
+        <td>
+          <button class="aksi-btn" onclick="editData(${idx})">Edit</button>
+          <button class="aksi-btn" onclick="hapusSiswa(${idx})">Hapus</button>
+        </td>
+      `;
+    }
     tbody.appendChild(tr);
   });
   saveLocal();
 }
+function editData(idx) {
+  editIdx = idx;
+  updateTable();
+}
+function batalEdit() {
+  editIdx = -1;
+  updateTable();
+}
+function simpanEdit(idx) {
+  let nama = document.getElementById('edit-nama').value.trim();
+  let nis = document.getElementById('edit-nis').value.trim();
+  let kelas = document.getElementById('edit-kelas').value;
+  siswa[idx] = {nama, nis, kelas};
+  editIdx = -1;
+  updateTable();
+}
 function hapusSiswa(idx) {
   if (confirm("Yakin ingin menghapus data ini?")) {
     siswa.splice(idx, 1);
+    if (editIdx === idx) editIdx = -1;
     updateTable();
   }
 }
