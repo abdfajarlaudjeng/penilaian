@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Upload Tugas Siswa (Drive)</title>
+  <title>Upload Tugas Siswa (Google Drive)</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f8f8f8; }
     .container {
@@ -22,14 +22,16 @@
       transition: background 0.16s;
     }
     button:hover { background: #195ba6; }
-    .success { background: #e2f7e1; color: #217a3d; padding: 12px; margin-top: 15px; border-radius: 4px; text-align: center; }
-    .error { background: #ffe7e7; color: #a41c1c; padding: 12px; margin-top: 15px; border-radius: 4px; text-align: center; }
+    .note { color: #888; font-size: 0.93em; margin-top: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Upload Tugas Siswa</h2>
-    <form id="uploadForm" enctype="multipart/form-data">
+    <form 
+      action="https://script.google.com/macros/s/AKfycbx....ISI_URL_WEBAPP_MU....../exec"
+      method="post" enctype="multipart/form-data" target="_blank"
+    >
       <label for="nama">Nama Siswa</label>
       <input type="text" id="nama" name="nama" required>
 
@@ -52,61 +54,9 @@
 
       <button type="submit">Kirim Tugas</button>
     </form>
-    <div id="status"></div>
+    <div class="note">
+      Setelah klik "Kirim Tugas", hasil akan muncul di tab baru. Cek link file Google Drive di Spreadsheet.
+    </div>
   </div>
-  <script>
-    // Ganti dengan URL Web App kamu (harus /exec, bukan /dev)
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxwx1zko0P13_AJugieCFO015BTtioXC2jr469dyZ0SwMI1IgTLDRU-fYfQl5OoAuTn/exec";
-
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      let statusDiv = document.getElementById('status');
-      statusDiv.textContent = '';
-      statusDiv.className = '';
-
-      // Validasi
-      const tugasInput = document.getElementById('tugas');
-      if (!tugasInput.files[0]) {
-        statusDiv.className = 'error';
-        statusDiv.textContent = 'File tugas harus diupload!';
-        return;
-      }
-
-      // Siapkan FormData
-      const formData = new FormData();
-      formData.append('nama', document.getElementById('nama').value.trim());
-      formData.append('kelas', document.getElementById('kelas').value);
-      formData.append('materi', document.getElementById('materi').value.trim());
-      formData.append('umpan_balik', document.getElementById('umpan_balik').value.trim());
-      formData.append('tugas', tugasInput.files[0]);
-
-      statusDiv.className = '';
-      statusDiv.textContent = 'Uploading...';
-
-      // Kirim ke Apps Script
-      fetch(GAS_URL, {
-        method: "POST",
-        body: formData
-      })
-      .then(async response => {
-        let text = await response.text();
-        let res;
-        try { res = JSON.parse(text); }
-        catch { throw new Error(text); }
-        if (res.status === "success") {
-          statusDiv.className = 'success';
-          statusDiv.innerHTML = 'Tugas berhasil diupload ke Google Drive!<br>Link file: <a href="' + res.fileUrl + '" target="_blank">Lihat File</a>';
-          document.getElementById('uploadForm').reset();
-        } else {
-          statusDiv.className = 'error';
-          statusDiv.textContent = 'Gagal simpan ke Spreadsheet: ' + (res.message || "");
-        }
-      })
-      .catch(err => {
-        statusDiv.className = 'error';
-        statusDiv.textContent = 'Gagal koneksi ke Spreadsheet/Drive! ' + err;
-      });
-    });
-  </script>
 </body>
 </html>
