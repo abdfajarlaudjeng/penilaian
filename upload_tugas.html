@@ -61,8 +61,8 @@
   </div>
   <script>
     if (!localStorage.getItem('login_user')) window.location.href = "login.html";
-    document.getElementById('nama').value = localStorage.getItem('login_user') || '';
-    document.getElementById('nama').readOnly = true;
+    // document.getElementById('nama').value = localStorage.getItem('login_user') || '';
+    // document.getElementById('nama').readOnly = true;
 
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -70,13 +70,38 @@
       statusDiv.textContent = '';
       statusDiv.className = '';
 
-      // Simulasi upload, replace dengan AJAX ke server di implementasi nyata
-      setTimeout(function() {
-        statusDiv.className = 'success';
-        statusDiv.textContent = 'Tugas berhasil diupload! (Simulasi, file tidak benar-benar dikirim)';
-        document.getElementById('uploadForm').reset();
-        document.getElementById('nama').value = localStorage.getItem('login_user') || '';
-      }, 1000);
+      // Ambil data form
+      const nama = document.getElementById('nama').value.trim();
+      const kelas = document.getElementById('kelas').value;
+      const materi = document.getElementById('materi').value.trim();
+      const umpan_balik = document.getElementById('umpan_balik').value.trim();
+      const tugasInput = document.getElementById('tugas');
+      const fileObj = tugasInput.files[0];
+
+      if (!fileObj) {
+        statusDiv.className = 'error';
+        statusDiv.textContent = 'File tugas harus diupload!';
+        return;
+      }
+
+      // Untuk simulasi, hanya simpan nama file (tidak upload file beneran)
+      const fileName = fileObj.name;
+
+      // Ambil array tugas dari localStorage, kalau belum ada buat array baru
+      let tugasArr = [];
+      try {
+        tugasArr = JSON.parse(localStorage.getItem('data_tugas')) || [];
+      } catch(e) { tugasArr = []; }
+
+      // Tambah data baru
+      tugasArr.push({ nama, kelas, materi, umpan_balik, file: fileName });
+
+      // Simpan kembali ke localStorage
+      localStorage.setItem('data_tugas', JSON.stringify(tugasArr));
+
+      statusDiv.className = 'success';
+      statusDiv.textContent = 'Tugas berhasil diupload!';
+      document.getElementById('uploadForm').reset();
     });
   </script>
 </body>
