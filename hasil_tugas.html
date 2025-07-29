@@ -33,21 +33,6 @@
     }
     tr:nth-child(even) { background: #f4f8fc; }
     .back-link { display: block; margin: 18px 0 4px 0; text-align: center; color: #195ba6; text-decoration: none; }
-    .btn-download {
-      background: #2d7ae0;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 16px;
-      cursor: pointer;
-      font-size: .97em;
-      text-decoration: none;
-      transition: background 0.16s;
-      display: inline-block;
-    }
-    .btn-download:hover {
-      background: #195ba6;
-    }
     .no-data {
       text-align: center;
       color: #888;
@@ -76,32 +61,11 @@
     </table>
   </div>
   <script>
-    // Simulasi data tugas yang sudah diupload siswa
-    // Pada implementasi nyata, data ini diambil dari database/server
-    const dataTugas = [
-      {
-        nama: "Dewi Lestari",
-        kelas: "7",
-        materi: "Hukum Ohm",
-        umpan_balik: "Materi mudah dipahami, tapi contoh soal bisa lebih banyak.",
-        file: "tugas_dewi_hukumohm.pdf"
-      },
-      {
-        nama: "Rizky Maulana",
-        kelas: "8",
-        materi: "Sistem Peredaran Darah",
-        umpan_balik: "Saya suka video penjelasan materi.",
-        file: "tugas_rizky_darah.docx"
-      },
-      {
-        nama: "Siti Aisyah",
-        kelas: "9",
-        materi: "Perang Dunia II",
-        umpan_balik: "Materi menarik, tapi ingin diskusi lebih lanjut.",
-        file: "tugas_siti_perangdunia2.zip"
-      }
-      // Tambahkan data lain jika perlu
-    ];
+    // Ambil data dari localStorage
+    let dataTugas = [];
+    try {
+      dataTugas = JSON.parse(localStorage.getItem('data_tugas')) || [];
+    } catch(e) { dataTugas = []; }
 
     function populateTable() {
       const tbody = document.getElementById("tbodyTugas");
@@ -111,7 +75,6 @@
       }
       tbody.innerHTML = "";
       dataTugas.forEach((item, idx) => {
-        // Untuk simulasi, unduh file hanya link dummy
         tbody.innerHTML += `
           <tr>
             <td>${idx + 1}</td>
@@ -119,9 +82,7 @@
             <td>${item.kelas}</td>
             <td>${item.materi}</td>
             <td>${item.umpan_balik}</td>
-            <td>
-              <a class="btn-download" href="uploads/${item.file}" download>${item.file}</a>
-            </td>
+            <td>${item.file}</td>
           </tr>
         `;
       });
