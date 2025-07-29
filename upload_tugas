@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Tugas Siswa</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin: 0; }
+    .container {
+      max-width: 400px;
+      background: #fff;
+      margin: 60px auto 0 auto;
+      padding: 34px 30px 24px 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 18px rgba(45,122,224,0.10);
+    }
+    h2 { color: #2d7ae0; text-align: center; margin-bottom: 22px; }
+    label { display: block; margin-top: 16px; color: #195ba6; font-weight: bold; }
+    input[type="text"], input[type="file"], textarea, select {
+      width: 100%; padding: 8px; margin-top: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;
+    }
+    textarea { min-height: 60px; resize: vertical; }
+    button {
+      background: #2d7ae0; color: #fff; border: none; border-radius: 4px;
+      padding: 10px 0; width: 100%; font-size: 1.08em; margin-top: 24px; cursor: pointer;
+      transition: background 0.16s;
+    }
+    button:hover { background: #195ba6; }
+    .back-link { display: block; margin: 18px 0 4px 0; text-align: center; color: #195ba6; text-decoration: none; }
+    .success { background: #e2f7e1; color: #217a3d; padding: 12px; margin-top: 15px; border-radius: 4px; text-align: center; }
+    .error { background: #ffe7e7; color: #a41c1c; padding: 12px; margin-top: 15px; border-radius: 4px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Tugas Siswa</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="nama">Nama Siswa</label>
+      <input type="text" id="nama" name="nama" required>
+
+      <label for="kelas">Kelas</label>
+      <select id="kelas" name="kelas" required>
+        <option value="">Pilih Kelas</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+
+      <label for="materi">Materi</label>
+      <input type="text" id="materi" name="materi" required>
+
+      <label for="umpan_balik">Umpan Balik dari Materi</label>
+      <textarea id="umpan_balik" name="umpan_balik" placeholder="Tuliskan umpan balik Anda terhadap materi sebelum mengirim tugas..." required></textarea>
+
+      <label for="tugas">File Tugas (PDF/JPG/PNG/DOCX/ZIP)</label>
+      <input type="file" id="tugas" name="tugas" accept=".pdf,.jpg,.jpeg,.png,.docx,.zip" required>
+
+      <button type="submit">Kirim Tugas</button>
+    </form>
+    <a class="back-link" href="index.html">&laquo; Kembali ke Dashboard</a>
+    <div id="status"></div>
+  </div>
+  <script>
+    if (!localStorage.getItem('login_user')) window.location.href = "login.html";
+    document.getElementById('nama').value = localStorage.getItem('login_user') || '';
+    document.getElementById('nama').readOnly = true;
+
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let statusDiv = document.getElementById('status');
+      statusDiv.textContent = '';
+      statusDiv.className = '';
+
+      // Simulasi upload, replace dengan AJAX ke server di implementasi nyata
+      setTimeout(function() {
+        statusDiv.className = 'success';
+        statusDiv.textContent = 'Tugas berhasil diupload! (Simulasi, file tidak benar-benar dikirim)';
+        document.getElementById('uploadForm').reset();
+        document.getElementById('nama').value = localStorage.getItem('login_user') || '';
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
