@@ -22,7 +22,7 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .btn-download, .btn-sheet {
+    .btn-download, .btn-sheet, .btn-reset {
       background: #2d7ae0;
       color: #fff;
       border: none;
@@ -35,7 +35,7 @@
       display: inline-block;
       margin-right: 4px;
     }
-    .btn-download:hover, .btn-sheet:hover {
+    .btn-download:hover, .btn-sheet:hover, .btn-reset:hover {
       background: #195ba6;
     }
     table {
@@ -73,10 +73,14 @@
   <div class="container">
     <h2>Daftar Hasil Upload Tugas Siswa</h2>
     <div class="action-bar">
-      <a class="btn-sheet" href="https://docs.google.com/spreadsheets/d/1wwDcKaRQwo5_86slZukjmCDfNt8cTKgx9adiDPtgSK8/edit?gid=1291127675#gid=1291127675" target="_blank">
-        Lihat di Google Spreadsheet
-      </a>
-      <button class="btn-download" id="downloadCsvBtn">Unduh CSV</button>
+      <div>
+        <a class="btn-sheet" href="https://docs.google.com/spreadsheets/d/1wwDcKaRQwo5_86slZukjmCDfNt8cTKgx9adiDPtgSK8/edit?gid=1291127675#gid=1291127675" target="_blank">
+          Lihat di Google Spreadsheet
+        </a>
+        <button class="btn-download" id="downloadCsvBtn">Unduh CSV</button>
+        <button class="btn-reset" id="resetBtn">Reset Data</button>
+      </div>
+      <div id="spreadsheetSyncStatus"></div>
     </div>
     <table id="tugasTable">
       <thead>
@@ -96,6 +100,8 @@
     <a class="back-link" href="index.html">&laquo; Kembali ke Dashboard</a>
   </div>
   <script>
+    // Ganti dengan URL web app Google Apps Script kamu
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxxRoLGOavjFqtfQBQGIurXxMyfmRqdZZApDhyPw6OX5GMlp6wZyGN0EXri9_RZvjY/exec";
     // Ambil data dari localStorage
     let dataTugas = [];
     try {
@@ -160,9 +166,55 @@
       document.body.removeChild(link);
     }
 
-    document.getElementById("downloadCsvBtn").addEventListener("click", downloadCsv);
+    // Fungsi reset data
+    function resetData() {
+      if (confirm("Yakin ingin menghapus SEMUA data tugas siswa?")) {
+        localStorage.removeItem('data_tugas');
+        dataTugas = [];
+        populateTable();
+        document.getElementById("spreadsheetSyncStatus").innerHTML = "";
+      }
+    }
 
-    populateTable();
+    // Fungsi untuk mengirim data ke Google Spreadsheet via Google Apps Script
+    function syncToSpreadsheet() {
+      const statusDiv = document.getElementById("spreadsheetSyncStatus");
+      if (!GAS_URL || GAS_URL.includes("ISI_URL_WEBAPP_KAMU")) {
+        statusDiv.innerHTML = "<span style='color:red'>[!] URL Web App Google Apps Script belum diatur.</span>";
+        return;
+      }
+      if (!dataTugas.length) {
+        statusDiv.innerHTML = "<span style='color:orange'>Tidak ada data untuk disinkronkan.</span>";
+        return;
+      }
+      statusDiv.innerHTML = "Menyinkronkan ke Spreadsheet...";
+      // Kirim seluruh data dalam satu request (bisa juga satu per satu jika perlu)
+      fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({data: dataTugas}),
+        headers: {"Content-Type": "application/json"}
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.status === "success") {
+          statusDiv.innerHTML = "<span style='color:green'>Data berhasil disimpan di Spreadsheet.</span>";
+        } else {
+          statusDiv.innerHTML = "<span style='color:red'>Gagal sinkronisasi Spreadsheet: " + (res.message||"") + "</span>";
+        }
+      })
+      .catch(err => {
+        statusDiv.innerHTML = "<span style='color:red'>Gagal koneksi ke Spreadsheet.</span>";
+      });
+    }
+
+    document.getElementById("downloadCsvBtn").addEventListener("click", downloadCsv);
+    document.getElementById("resetBtn").addEventListener("click", resetData);
+
+    // Sinkronisasi otomatis setiap kali halaman ini dibuka/di-refresh
+    window.addEventListener("DOMContentLoaded", function() {
+      populateTable();
+      syncToSpreadsheet();
+    });
   </script>
 </body>
 </html>
