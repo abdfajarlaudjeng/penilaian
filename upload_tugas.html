@@ -60,9 +60,8 @@
     <div id="status"></div>
   </div>
   <script>
-    if (!localStorage.getItem('login_user')) window.location.href = "login.html";
-    // document.getElementById('nama').value = localStorage.getItem('login_user') || '';
-    // document.getElementById('nama').readOnly = true;
+    // Ganti dengan URL Web App Google Apps Script kamu
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzRjP7m4n6YWE3t_qGih_N8K4PjU6luzrgAUu0L6njFGVe0o1-uhCMdL8LaBnQmYw/exec";
 
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -84,24 +83,41 @@
         return;
       }
 
-      // Untuk simulasi, hanya simpan nama file (tidak upload file beneran)
+      // Hanya simpan nama file (file tidak dikirim ke server)
       const fileName = fileObj.name;
 
-      // Ambil array tugas dari localStorage, kalau belum ada buat array baru
-      let tugasArr = [];
-      try {
-        tugasArr = JSON.parse(localStorage.getItem('data_tugas')) || [];
-      } catch(e) { tugasArr = []; }
+      // Data yang akan dikirim ke Spreadsheet
+      const dataTugas = [{
+        nama,
+        kelas,
+        materi,
+        umpan_balik,
+        file: fileName
+      }];
 
-      // Tambah data baru
-      tugasArr.push({ nama, kelas, materi, umpan_balik, file: fileName });
-
-      // Simpan kembali ke localStorage
-      localStorage.setItem('data_tugas', JSON.stringify(tugasArr));
-
-      statusDiv.className = 'success';
-      statusDiv.textContent = 'Tugas berhasil diupload!';
-      document.getElementById('uploadForm').reset();
+      // Kirim data ke Google Apps Script Web App
+      statusDiv.className = '';
+      statusDiv.textContent = 'Menyimpan ke Spreadsheet...';
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ data: dataTugas })
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.status === "success") {
+          statusDiv.className = 'success';
+          statusDiv.textContent = 'Tugas berhasil diupload dan disimpan di Spreadsheet!';
+          document.getElementById('uploadForm').reset();
+        } else {
+          statusDiv.className = 'error';
+          statusDiv.textContent = 'Gagal simpan ke Spreadsheet: ' + (res.message || "");
+        }
+      })
+      .catch(err => {
+        statusDiv.className = 'error';
+        statusDiv.textContent = 'Gagal koneksi ke Spreadsheet!';
+      });
     });
   </script>
 </body>
