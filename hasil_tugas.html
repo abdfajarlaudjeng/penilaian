@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Hasil Upload Tugas Siswa</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin: 0; }
+    .container {
+      max-width: 700px;
+      background: #fff;
+      margin: 60px auto 0 auto;
+      padding: 34px 30px 24px 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 18px rgba(45,122,224,0.10);
+    }
+    h2 { color: #2d7ae0; text-align: center; margin-bottom: 22px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background: #f9f9f9;
+    }
+    th, td {
+      border: 1px solid #e3e3e3;
+      padding: 10px;
+      text-align: left;
+      font-size: 1em;
+    }
+    th {
+      background: #2d7ae0;
+      color: #fff;
+      font-weight: bold;
+    }
+    tr:nth-child(even) { background: #f4f8fc; }
+    .back-link { display: block; margin: 18px 0 4px 0; text-align: center; color: #195ba6; text-decoration: none; }
+    .btn-download {
+      background: #2d7ae0;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 16px;
+      cursor: pointer;
+      font-size: .97em;
+      text-decoration: none;
+      transition: background 0.16s;
+      display: inline-block;
+    }
+    .btn-download:hover {
+      background: #195ba6;
+    }
+    .no-data {
+      text-align: center;
+      color: #888;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Daftar Hasil Upload Tugas Siswa</h2>
+    <a class="back-link" href="index.html">&laquo; Kembali ke Dashboard</a>
+    <table id="tugasTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Siswa</th>
+          <th>Kelas</th>
+          <th>Materi</th>
+          <th>Umpan Balik</th>
+          <th>File Tugas</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyTugas">
+        <!-- Data diisi oleh JavaScript -->
+      </tbody>
+    </table>
+  </div>
+  <script>
+    // Simulasi data tugas yang sudah diupload siswa
+    // Pada implementasi nyata, data ini diambil dari database/server
+    const dataTugas = [
+      {
+        nama: "Dewi Lestari",
+        kelas: "7",
+        materi: "Hukum Ohm",
+        umpan_balik: "Materi mudah dipahami, tapi contoh soal bisa lebih banyak.",
+        file: "tugas_dewi_hukumohm.pdf"
+      },
+      {
+        nama: "Rizky Maulana",
+        kelas: "8",
+        materi: "Sistem Peredaran Darah",
+        umpan_balik: "Saya suka video penjelasan materi.",
+        file: "tugas_rizky_darah.docx"
+      },
+      {
+        nama: "Siti Aisyah",
+        kelas: "9",
+        materi: "Perang Dunia II",
+        umpan_balik: "Materi menarik, tapi ingin diskusi lebih lanjut.",
+        file: "tugas_siti_perangdunia2.zip"
+      }
+      // Tambahkan data lain jika perlu
+    ];
+
+    function populateTable() {
+      const tbody = document.getElementById("tbodyTugas");
+      if (dataTugas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="no-data">Belum ada tugas yang diupload.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = "";
+      dataTugas.forEach((item, idx) => {
+        // Untuk simulasi, unduh file hanya link dummy
+        tbody.innerHTML += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${item.nama}</td>
+            <td>${item.kelas}</td>
+            <td>${item.materi}</td>
+            <td>${item.umpan_balik}</td>
+            <td>
+              <a class="btn-download" href="uploads/${item.file}" download>${item.file}</a>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    populateTable();
+  </script>
+</body>
+</html>
